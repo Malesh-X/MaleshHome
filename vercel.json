@@ -15,28 +15,39 @@
       "permanent": true
     },
     {
-      "source": "/:path*",
+      "source": "/labs",
+      "has": [
+        {
+          "type": "host",
+          "value": "malesh.com"
+        }
+      ],
+      "destination": "https://labs.malesh.com/",
+      "permanent": false
+    },
+    {
+      "source": "/labs/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "malesh.com"
+        }
+      ],
+      "destination": "https://labs.malesh.com/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
       "has": [
         {
           "type": "host",
           "value": "labs.malesh.com"
         }
       ],
-      "destination": "https://malesh.com/",
-      "permanent": false
+      "destination": "/labs"
     },
-    {
-      "source": "/labs/:path*",
-      "destination": "https://malesh.com/",
-      "permanent": false
-    },
-    {
-      "source": "/labs",
-      "destination": "https://malesh.com/",
-      "permanent": false
-    }
-  ],
-  "rewrites": [
     {
       "source": "/",
       "destination": "/home"

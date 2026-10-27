@@ -1,0 +1,120 @@
+:root {
+  --bg: #f6f5f1;
+  --fg: #141414;
+  --muted: #8a8780;
+  --line: #dcd9d1;
+  --accent: #141414;
+  --accent-fg: #f6f5f1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d0d0c;
+    --fg: #ecebe6;
+    --muted: #77756f;
+    --line: #2a2926;
+    --accent: #ecebe6;
+    --accent-fg: #0d0d0c;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 16px/1.5 ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 0 24px;
+}
+
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  animation: rise 900ms cubic-bezier(.2, .7, .2, 1) both;
+}
+
+.mark {
+  font-family: ui-serif, "New York", "Iowan Old Style", Georgia, serif;
+  font-weight: 400;
+  font-size: clamp(56px, 14vw, 104px);
+  letter-spacing: -0.045em;
+  line-height: 0.9;
+}
+
+.mark .dot { color: var(--muted); }
+
+.line {
+  margin-top: 20px;
+  color: var(--muted);
+  font-size: 17px;
+}
+
+nav {
+  margin-top: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 28px;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.link {
+  font-size: 15px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 2px;
+  transition: border-color 200ms;
+}
+
+.link:hover, .link:focus-visible { border-color: var(--fg); }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  padding: 11px 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  transition: transform 200ms, opacity 200ms;
+}
+
+.button:hover, .button:focus-visible { transform: translateY(-1px); opacity: .9; }
+
+.button .arrow { transition: transform 200ms; }
+.button:hover .arrow { transform: translateX(3px); }
+
+a:focus-visible { outline: 2px solid var(--fg); outline-offset: 4px; border-radius: 4px; }
+
+footer {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 0 32px;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main { animation: none; }
+  * { transition: none !important; }
+}
