@@ -172,8 +172,8 @@
     document.body.prepend(canvas);
     const ctx = canvas.getContext("2d");
     const css = getComputedStyle(document.documentElement);
-    const ink = css.getPropertyValue("--fg").trim() || "#171717";
-    const accent = css.getPropertyValue("--accent").trim() || "#ea5a1c";
+    const ink = css.getPropertyValue("--fg").trim() || "#f2f1ec";
+    const accent = css.getPropertyValue("--accent").trim() || "#ff6224";
 
     let w = 0, h = 0, dpr = 1, gap = 22, quiet = [];
     const pointer = { x: -9999, y: -9999, tx: -9999, ty: -9999, s: 0, ts: 0, last: 0 };
@@ -245,7 +245,7 @@
             cx += (dx / len) * f * 5; cy += (dy / len) * f * 5;
           }
           let set = inkPaths;
-          if (f > 0.62) { set = accPaths; a = Math.min(1, a + 0.1); r += 0.3; }
+          if (f > 0.62) { set = accPaths; a = Math.min(1, a + 0.3); r += 0.3; }
           const k = Math.min(100, Math.round(a * 100));
           const path = set[k] || (set[k] = new Path2D());
           path.moveTo(cx + r, cy);

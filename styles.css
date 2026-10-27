@@ -17,14 +17,15 @@
 }
 
 :root {
-  color-scheme: light;
-  --bg: #f5f4f0;
-  --panel: #efede8;
-  --fg: #171717;
-  --muted: #66655f;
-  --faint: #a3a19a;
-  --line: #dddbd3;
-  --accent: #ea5a1c;
+  color-scheme: dark;
+  --bg: #0a0a0a;
+  --panel: #141413;
+  --fg: #f2f1ec;
+  --muted: #9a978f;
+  --faint: #55534d;
+  --line: #242422;
+  --accent: #ff6224;
+  --unlit: #6b6963;
 
   --sans: "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -172,7 +173,7 @@ svg { display: block; flex: none; }
   transition: background-color .25s var(--ease), transform .25s var(--ease);
 }
 .button svg { transition: transform .25s var(--ease); }
-.button:hover { background: #000; }
+.button:hover { background: #fff; }
 .button:hover svg { transform: translateX(3px); }
 .button:active { transform: scale(.98); }
 
@@ -504,7 +505,7 @@ svg { display: block; flex: none; }
 .area:hover h3 { transition-delay: 0s; }
 
 /* Statement lights up as you read */
-.statement.scrubbing .sw { color: #858379; transition: color .45s ease; }
+.statement.scrubbing .sw { color: var(--unlit); transition: color .45s ease; }
 .statement.scrubbing .sw.on { color: var(--fg); }
 
 /* Email: letters roll over to orange */
