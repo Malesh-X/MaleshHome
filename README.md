@@ -8,7 +8,7 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 | `labs/index.html` | labs.malesh.com, the experiments index (host rewrite in `vercel.json`, not indexed) |
 | `404.html` | Not-found page |
 | `styles.css` | All styles |
-| `motion.js` | Motion layer: hero dot field, text decode, scroll reveals, email roll. The page works fully without it and respects reduced-motion settings. |
+| `motion.js` | Motion layer, loaded on every page: dot-matrix field behind the whole site, text decode, scroll reveals, email roll. The page works fully without it and respects reduced-motion settings. |
 | `fonts/` | Self-hosted Inter and Geist Mono (variable, Latin subset, SIL OFL) |
 | `og.png` | Social share image, 1200 × 630 |
 | `favicon.svg`, `apple-touch-icon.png` | Icons |

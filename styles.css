@@ -195,7 +195,9 @@ svg { display: block; flex: none; }
   grid-column: 1 / -1;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: var(--panel);
+  background: color-mix(in srgb, var(--panel) 80%, transparent);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   padding: 22px 22px 8px;
 }
 
@@ -383,16 +385,14 @@ svg { display: block; flex: none; }
   transform: scaleX(0);
 }
 
-/* Dot-matrix field */
+/* Dot-matrix field: one fixed canvas behind every page (drawn by motion.js) */
 .field {
-  position: absolute; inset: 0;
+  position: fixed; inset: 0;
   width: 100%; height: 100%;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 1.6s ease .3s;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 18%, #000 78%, transparent 100%);
+  transition: opacity 1.6s ease .2s;
 }
 .field.on { opacity: 1; }
 

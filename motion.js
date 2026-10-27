@@ -161,34 +161,43 @@
     });
   }
 
-  /* ---------- Dot-matrix field behind the hero ---------- */
+  /* ---------- Dot-matrix field behind the whole site ---------- */
 
   function fieldSetup(staticOnly = false) {
-    const canvas = document.querySelector(".field");
-    if (!canvas || !canvas.getContext) return;
-    const hero = canvas.parentElement;
+    const canvas = document.createElement("canvas");
+    if (!canvas.getContext || typeof Path2D === "undefined") return;
+    const inkPaths = new Array(101).fill(null), accPaths = new Array(101).fill(null);
+    canvas.className = "field";
+    canvas.setAttribute("aria-hidden", "true");
+    document.body.prepend(canvas);
     const ctx = canvas.getContext("2d");
     const css = getComputedStyle(document.documentElement);
     const ink = css.getPropertyValue("--fg").trim() || "#171717";
     const accent = css.getPropertyValue("--accent").trim() || "#ea5a1c";
 
-    let w = 0, h = 0, dpr = 1, gap = 22, dots = [];
+    let w = 0, h = 0, dpr = 1, gap = 22, quiet = [];
     const pointer = { x: -9999, y: -9999, tx: -9999, ty: -9999, s: 0, ts: 0, last: 0 };
-    let visible = true, running = false, t0 = performance.now();
+    let running = false, frame = 0;
+    const t0 = performance.now();
+
+    // Text blocks the lens should not glare over (viewport coordinates, refreshed on scroll).
+    const quietEls = [...document.querySelectorAll(".headline, .lede, .actions, .statement, .area, .collab p, .email, .page-list, .site-footer .wrap, .section-label")];
+    function measureQuiet() {
+      quiet = quietEls.map((el) => el.getBoundingClientRect());
+    }
+    function inQuiet(x, y) {
+      for (const r of quiet) if (x > r.left - 24 && x < r.right + 24 && y > r.top - 24 && y < r.bottom + 24) return true;
+      return false;
+    }
 
     function resize() {
-      const r = hero.getBoundingClientRect();
       dpr = Math.min(window.devicePixelRatio || 1, 2);
-      w = r.width; h = r.height;
+      w = window.innerWidth; h = window.innerHeight;
       gap = w < 640 ? 18 : 22;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
-      canvas.style.width = w + "px";
-      canvas.style.height = h + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      dots = [];
-      const ox = (w % gap) / 2 + gap / 2, oy = (h % gap) / 2 + gap / 2;
-      for (let y = oy; y < h; y += gap) for (let x = ox; x < w; x += gap) dots.push(x, y);
+      measureQuiet();
       if (staticOnly || !running) draw(performance.now());
     }
 
@@ -196,52 +205,62 @@
       const t = (now - t0) / 1000;
       ctx.clearRect(0, 0, w, h);
 
-      // When nobody is pointing (phones, idle), a lens drifts on its own.
-      const idle = now - pointer.last > 2600;
-      if (idle) {
-        pointer.tx = w * (0.62 + 0.26 * Math.sin(t * 0.23));
-        pointer.ty = h * (0.5 + 0.3 * Math.sin(t * 0.31 + 1.3));
-        pointer.ts = 0.75;
+      // Nobody pointing (phones, idle): the lens drifts on its own.
+      if (now - pointer.last > 2600) {
+        pointer.tx = w * (0.55 + 0.33 * Math.sin(t * 0.21));
+        pointer.ty = h * (0.5 + 0.32 * Math.sin(t * 0.29 + 1.3));
+        pointer.ts = w < 1040 ? 0.45 : 0.8;
       }
       if (pointer.x < -1000) { pointer.x = pointer.tx; pointer.y = pointer.ty; }
       pointer.x += (pointer.tx - pointer.x) * 0.09;
       pointer.y += (pointer.ty - pointer.y) * 0.09;
-      pointer.s += (pointer.ts - pointer.s) * 0.06;
+      // Dim the lens while it sits over copy, so text stays crisp.
+      const target = inQuiet(pointer.x, pointer.y) ? pointer.ts * 0.3 : pointer.ts;
+      pointer.s += (target - pointer.s) * 0.07;
 
       const sigma = Math.max(90, Math.min(150, w * 0.09));
       const inv = 1 / (2 * sigma * sigma);
-      const px = pointer.x, py = pointer.y;
-      // Keep the lens off the copy: full strength on the right of wide layouts, gentle on phones.
-      const wide = w >= 1040;
-      const ps = staticOnly ? 0 : pointer.s * (wide ? 1 : 0.5);
-      const x0 = w * 0.42, x1 = w * 0.66;
+      const px = pointer.x, py = pointer.y, ps = staticOnly ? 0 : pointer.s;
 
-      ctx.fillStyle = ink;
-      for (let i = 0; i < dots.length; i += 2) {
-        const x = dots[i], y = dots[i + 1];
-        const dx = x - px, dy = y - py;
-        let k = 1;
-        if (wide) { const u = Math.min(1, Math.max(0, (x - x0) / (x1 - x0))); k = 0.22 + 0.78 * u * u * (3 - 2 * u); }
-        const f = ps * k * Math.exp(-(dx * dx + dy * dy) * inv);
-        const wave = staticOnly ? 0 : 0.5 + 0.5 * Math.sin(x * 0.011 + y * 0.007 - t * 1.1);
-        const a = 0.085 + wave * 0.05 + f * 0.55;
-        let r = 0.9 + wave * 0.35 + f * 2.1;
-        // Dots lean away from the lens, like iron filings.
-        const push = f * 5;
-        const len = Math.hypot(dx, dy) || 1;
-        const sx = x + (dx / len) * push, sy = y + (dy / len) * push;
-        if (f > 0.62) { ctx.fillStyle = accent; ctx.globalAlpha = Math.min(1, a + 0.1); r += 0.3; }
-        else { ctx.fillStyle = ink; ctx.globalAlpha = a; }
-        ctx.beginPath();
-        ctx.arc(sx, sy, r, 0, 6.2832);
-        ctx.fill();
+      // The grid scrolls at half speed for a little depth.
+      const sy0 = window.scrollY;
+      const oy = staticOnly ? gap / 2 : ((-sy0 * 0.5) % gap + gap) % gap;
+      const ox = (w % gap) / 2;
+      const reach = sigma * 3.2;
+
+      // Dots are grouped by colour and opacity (1% steps) so each group is a
+      // single fill: a few dozen draw calls per frame instead of a thousand.
+      inkPaths.fill(null); accPaths.fill(null);
+      for (let y = oy - gap; y < h + gap; y += gap) {
+        for (let x = ox; x < w; x += gap) {
+          const dx = x - px, dy = y - py;
+          const near = ps > 0.01 && Math.abs(dx) < reach && Math.abs(dy) < reach;
+          const f = near ? ps * Math.exp(-(dx * dx + dy * dy) * inv) : 0;
+          const wave = staticOnly ? 0 : 0.5 + 0.5 * Math.sin(x * 0.011 + y * 0.007 + sy0 * 0.0035 - t * 1.1);
+          let a = 0.075 + wave * 0.045 + f * 0.55;
+          let r = 0.9 + wave * 0.35 + f * 2.1;
+          let cx = x, cy = y;
+          if (f > 0.02) {
+            const len = Math.hypot(dx, dy) || 1;
+            cx += (dx / len) * f * 5; cy += (dy / len) * f * 5;
+          }
+          let set = inkPaths;
+          if (f > 0.62) { set = accPaths; a = Math.min(1, a + 0.1); r += 0.3; }
+          const k = Math.min(100, Math.round(a * 100));
+          const path = set[k] || (set[k] = new Path2D());
+          path.moveTo(cx + r, cy);
+          path.arc(cx, cy, r, 0, 6.2832);
+        }
       }
+      ctx.fillStyle = ink;
+      for (let k = 0; k <= 100; k++) if (inkPaths[k]) { ctx.globalAlpha = k / 100; ctx.fill(inkPaths[k]); }
+      ctx.fillStyle = accent;
+      for (let k = 0; k <= 100; k++) if (accPaths[k]) { ctx.globalAlpha = k / 100; ctx.fill(accPaths[k]); }
       ctx.globalAlpha = 1;
     }
 
-    let frame = 0;
     function loop(now) {
-      if (!visible || document.hidden) { running = false; return; }
+      if (document.hidden) { running = false; return; }
       // Phones get 30fps to save battery; nobody can tell on a drifting field.
       if (w >= 640 || (frame++ & 1) === 0) draw(now);
       raf(loop);
@@ -254,22 +273,20 @@
     }
 
     window.addEventListener("resize", () => raf(resize));
+    window.addEventListener("scroll", measureQuiet, { passive: true });
     resize();
+    canvas.classList.add("on");
     if (staticOnly) return;
 
-    hero.addEventListener("pointermove", (e) => {
+    window.addEventListener("pointermove", (e) => {
       if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
-      const r = hero.getBoundingClientRect();
-      pointer.tx = e.clientX - r.left;
-      pointer.ty = e.clientY - r.top;
+      pointer.tx = e.clientX;
+      pointer.ty = e.clientY;
       pointer.ts = 1;
       pointer.last = performance.now();
-    });
-    hero.addEventListener("pointerleave", () => { pointer.last = 0; });
-
-    new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) start(); }).observe(hero);
+    }, { passive: true });
+    document.documentElement.addEventListener("pointerleave", () => { pointer.last = 0; });
     document.addEventListener("visibilitychange", () => { if (!document.hidden) start(); });
-    canvas.classList.add("on");
     start();
   }
 
@@ -280,11 +297,11 @@
     scrubSetup();
     revealSetup();
     progressSetup();
-    if (!reduce) {
-      fieldSetup();
-      if (finePointer) magneticSetup();
-    } else {
-      fieldSetup(true);
-    }
+    if (!reduce && finePointer) magneticSetup();
+    // The field is decoration: start it once the page has settled.
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
+    const startField = () => idle(() => fieldSetup(reduce), { timeout: 800 });
+    if (document.readyState === "complete") startField();
+    else window.addEventListener("load", startField, { once: true });
   });
 })();
