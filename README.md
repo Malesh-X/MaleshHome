@@ -4,7 +4,7 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 
 | Path | Serves |
 | --- | --- |
-| `index.html` | malesh.com, the studio page |
+| `home/index.html` | malesh.com, the studio page (served at `/` by a rewrite in `vercel.json`; Vercel serves real files before rewrites, so the home page can't sit at the root or it would also show on labs.malesh.com) |
 | `labs/index.html` | labs.malesh.com, the experiments index (host rewrite in `vercel.json`, not indexed) |
 | `404.html` | Not-found page |
 | `styles.css` | All styles |
@@ -15,7 +15,7 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 
 ## Editing
 
-- Copy lives directly in `index.html`. Keep it factual: no invented staff, clients, funding or results.
+- Copy lives directly in `home/index.html`. Keep it factual: no invented staff, clients, funding or results.
 - Colors and type are CSS variables at the top of `styles.css`.
 - To add an experiment, copy the `<li>` in `labs/index.html`.
 - If you change the headline, regenerate `og.png` so link previews match.
