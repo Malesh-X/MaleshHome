@@ -4,8 +4,7 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 
 | Path | Serves |
 | --- | --- |
-| `home/index.html` | malesh.com, the studio page (served at `/` by a rewrite in `vercel.json`; Vercel serves real files before rewrites, so the home page can't sit at the root or it would also show on labs.malesh.com) |
-| `labs/index.html` | labs.malesh.com, the experiments index (host rewrite in `vercel.json`, not indexed) |
+| `home/index.html` | malesh.com, the studio page (served at `/` by a rewrite in `vercel.json`) |
 | `404.html` | Not-found page |
 | `styles.css` | All styles |
 | `motion.js` | Motion layer, loaded on every page: dot-matrix field behind the whole site, text decode, scroll reveals, email roll. The page works fully without it and respects reduced-motion settings. |
@@ -17,7 +16,6 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 
 - Copy lives directly in `home/index.html`. Keep it factual: no invented staff, clients, funding or results.
 - Colors and type are CSS variables at the top of `styles.css`.
-- To add an experiment, copy the `<li>` in `labs/index.html`.
 - If you change the headline, regenerate `og.png` so link previews match.
 
 ## Preview locally
@@ -26,8 +24,8 @@ The Malesh Labs website. Plain HTML and CSS with one small motion script: no fra
 npx serve .
 ```
 
-Open http://localhost:3000. The labs page is at `/labs` locally; the host rewrite only applies on labs.malesh.com.
+Open http://localhost:3000/home/ (on Vercel, `/` is rewritten to `/home`).
 
 ## Domains on Vercel
 
-`malesh.com`, `www.malesh.com` and `labs.malesh.com` are attached to this project. `vercel.json` sends www to the bare domain, serves `/labs` on the labs subdomain, and sets security and cache headers.
+`malesh.com`, `www.malesh.com` and `labs.malesh.com` are attached to this project. `vercel.json` sends www to the bare domain, sends labs.malesh.com and `/labs` to the home page (there is no public experiments index), and sets security and cache headers.
